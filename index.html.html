@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tràmits de Naixement a Catalunya</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #FBF7F0;
+    --cream-dark: #F2EBE0;
+    --green: #2D5016;
+    --green-mid: #4A7C2B;
+    --green-light: #8BBF64;
+    --green-pale: #E8F3DC;
+    --amber: #C8821A;
+    --amber-light: #FAF0DC;
+    --red: #C0392B;
+    --red-light: #FCEAE8;
+    --blue: #1A5F8A;
+    --blue-light: #E4F0F8;
+    --purple: #6B4D9A;
+    --purple-light: #F5F0FA;
+    --orange: #E65100;
+    --orange-light: #FFF3E0;
+    --text: #2A2420;
+    --text-mid: #5C4F45;
+    --text-light: #8C7B6E;
+    --border: #DDD0C0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--text); line-height: 1.65; }
+
+  header {
+    background: var(--green); color: white;
+    padding: 3rem 2rem 2.5rem; text-align: center;
+    position: relative; overflow: hidden;
+  }
+  header::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 50%, rgba(139,191,100,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 20%, rgba(200,130,26,0.12) 0%, transparent 50%);
+  }
+  header .emoji-big { font-size: 3.5rem; display: block; margin-bottom: 0.75rem; animation: float 4s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  header h1 { font-family: 'Lora', serif; font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 700; margin-bottom: 0.5rem; position: relative; }
+  header p.subtitle { font-size: 1.05rem; font-weight: 300; opacity: 0.85; max-width: 560px; margin: 0 auto; position: relative; }
+  .badge-updated { display: inline-block; background: var(--amber); color: white; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.05em; padding: 0.2rem 0.75rem; border-radius: 100px; margin-top: 1rem; position: relative; }
+
+  .progress-bar-container { background: var(--cream-dark); padding: 1.25rem 1.5rem; text-align: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(4px); }
+  .progress-text { font-size: 0.85rem; color: var(--text-mid); margin-bottom: 0.5rem; font-weight: 500; }
+  .progress-track { background: var(--border); border-radius: 100px; height: 8px; max-width: 400px; margin: 0 auto; overflow: hidden; }
+  .progress-fill { background: linear-gradient(90deg, var(--green-mid), var(--green-light)); height: 100%; border-radius: 100px; transition: width 0.5s ease; width: 0%; }
+
+  .alert { margin: 1.25rem auto 0; max-width: 760px; padding: 1rem 1.25rem; border-radius: 10px; display: flex; gap: 0.75rem; align-items: flex-start; font-size: 0.9rem; }
+  .alert-icon { font-size: 1.3rem; flex-shrink: 0; }
+  .alert-blue { background: var(--blue-light); border-left: 4px solid var(--blue); color: #133A54; }
+  .alert-amber { background: var(--amber-light); border-left: 4px solid var(--amber); color: #5C3A00; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+
+  .section-title { font-family: 'Lora', serif; font-size: 1.0rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-light); margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); }
+
+  .step { background: white; border: 1px solid var(--border); border-radius: 16px; margin-bottom: 1rem; overflow: hidden; transition: box-shadow 0.2s ease, transform 0.2s ease; }
+  .step:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); transform: translateY(-1px); }
+  .step.done { opacity: 0.6; }
+  .step.done .step-header { background: var(--green-pale); }
+
+  .step-header { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.25rem; cursor: pointer; user-select: none; background: white; transition: background 0.2s; }
+  .step-header:hover { background: var(--cream); }
+
+  .step-number { width: 40px; height: 40px; border-radius: 50%; background: var(--green); color: white; font-weight: 700; font-size: 1rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .done .step-number { background: var(--green-mid); }
+
+  .step-meta { flex: 1; min-width: 0; }
+  .step-title { font-family: 'Lora', serif; font-weight: 600; font-size: 1.05rem; color: var(--text); }
+  .step-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.35rem; }
+
+  .tag { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.15rem 0.6rem; border-radius: 100px; }
+  .tag-urgent { background: var(--red-light); color: var(--red); }
+  .tag-online { background: var(--blue-light); color: var(--blue); }
+  .tag-presencial { background: var(--green-pale); color: var(--green); }
+  .tag-opcional { background: var(--purple-light); color: var(--purple); }
+  .tag-condicional { background: var(--orange-light); color: var(--orange); }
+
+  .chevron { font-size: 1.1rem; color: var(--text-light); transition: transform 0.3s ease; flex-shrink: 0; }
+  .step.open .chevron { transform: rotate(180deg); }
+
+  .step-checkbox { width: 22px; height: 22px; border: 2px solid var(--border); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; background: white; }
+  .step-checkbox.checked { background: var(--green-mid); border-color: var(--green-mid); color: white; }
+  .step-checkbox.checked::after { content: '✓'; font-size: 0.85rem; font-weight: 700; }
+
+  .step-body { display: none; padding: 0 1.25rem 1.25rem; border-top: 1px solid var(--cream-dark); }
+  .step.open .step-body { display: block; }
+  .step-body p { color: var(--text-mid); font-size: 0.92rem; margin: 0.75rem 0 0; }
+
+  .deadline { background: var(--red-light); border-radius: 8px; padding: 0.6rem 0.9rem; margin: 0.75rem 0 0; font-size: 0.85rem; color: var(--red); font-weight: 500; display: flex; align-items: center; gap: 0.5rem; }
+
+  .docs-title { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-light); margin: 1rem 0 0.5rem; }
+  .doc-item { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 7px; font-size: 0.88rem; background: var(--cream); margin-bottom: 0.35rem; cursor: pointer; transition: background 0.15s; }
+  .doc-item:hover { background: var(--cream-dark); }
+  .doc-cb { width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 4px; flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .doc-cb.checked { background: var(--green-mid); border-color: var(--green-mid); color: white; }
+  .doc-cb.checked::after { content: '✓'; font-size: 0.6rem; font-weight: 700; }
+  .doc-text { flex: 1; color: var(--text-mid); line-height: 1.4; }
+  .doc-new { font-size: 0.68rem; background: var(--amber); color: white; padding: 0.1rem 0.45rem; border-radius: 100px; font-weight: 600; margin-left: 0.3rem; vertical-align: middle; }
+
+  .link-btn { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; font-weight: 600; color: var(--blue); text-decoration: none; border: 1.5px solid var(--blue); border-radius: 8px; padding: 0.4rem 0.8rem; margin-top: 0.75rem; margin-right: 0.4rem; transition: all 0.2s; }
+  .link-btn:hover { background: var(--blue); color: white; }
+
+  .note { border-radius: 8px; padding: 0.7rem 0.9rem; font-size: 0.85rem; margin-top: 0.75rem; display: flex; gap: 0.5rem; align-items: flex-start; }
+  .note-amber { background: var(--amber-light); color: #5C3A00; }
+  .note-blue { background: var(--blue-light); color: #133A54; }
+
+  .celebration { text-align: center; padding: 2rem; background: var(--green-pale); border-radius: 16px; margin: 2rem 0; display: none; }
+  .celebration h2 { font-family: 'Lora', serif; color: var(--green); font-size: 1.5rem; margin-bottom: 0.5rem; }
+
+  footer { text-align: center; padding: 2rem; font-size: 0.8rem; color: var(--text-light); border-top: 1px solid var(--border); }
+  footer a { color: var(--green-mid); text-decoration: none; }
+
+  @media (max-width: 600px) {
+    header { padding: 2rem 1rem 1.75rem; }
+    .step-header { padding: 0.9rem 1rem; gap: 0.75rem; }
+    .step-body { padding: 0 1rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="emoji-big">🍼</span>
+  <h1>Tràmits de Naixement a Catalunya</h1>
+  <p class="subtitle">Guia pràctica per completar tots els papers del nadó, pas a pas, per tenir temps per a la criatura.</p>
+  <span class="badge-updated">✓ Actualitzat 2026 — Fonts oficials</span>
+</header>
+
+<div class="progress-bar-container">
+  <div class="progress-text" id="progress-text">0 de 12 tràmits completats</div>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<main>
+
+  <div class="alert alert-blue">
+    <span class="alert-icon">💡</span>
+    <div><strong>Com funciona?</strong> Marca cada tràmit quan el completes. L'ordre és important: cada pas sol requerir documents del pas anterior. El teu progrés es guarda al navegador.</div>
+  </div>
+  <div class="alert alert-amber">
+    <span class="alert-icon">⚠️</span>
+    <div>Des del 30 d'abril de 2021, el Llibre de Família en paper ja <strong>no s'expedeix</strong>. Ha estat substituït per un registre digital individual. Si en tens un de paper d'abans del 2021, segueix sent vàlid. Per als nous tràmits ara es demana el <strong>certificat literal de naixement</strong>.</div>
+  </div>
+
+  <!-- BLOC 0: PREPARACIÓ -->
+  <p class="section-title">📁 Preparació prèvia</p>
+
+  <div class="step" id="step-1" data-step="1">
+    <div class="step-header" onclick="toggleStep(1)">
+      <div class="step-checkbox" id="cb-1" onclick="toggleDone(event,1)"></div>
+      <div class="step-number">1</div>
+      <div class="step-meta">
+        <div class="step-title">Prepareu la carpeta de documents</div>
+        <div class="step-tags"><span class="tag tag-urgent">⏱ Abans de sortir de l'hospital</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>Compreu una carpeta per posar-hi tots els documents que us aniran donant al llarg del procés. Són molts papers i és fàcil oblidar-ne algun. Porteu sempre 2 còpies de cada document — en alguns llocs les exigiran i en altres no.</p>
+      <p class="docs-title">Poseu-hi des del principi:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI dels dos progenitors (originals i fotocòpies)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Llibre de Família en paper si en teniu un d'anterior al 2021 (original i fotocòpies de <strong>totes</strong> les pàgines escrites)</div></div>
+      <div class="note note-amber">💡 <span>En alguns centres no disposen de fotocopiadora pública. En altres us les faran amablement. Aneu sobre segur i porteu-ne de fetes de casa.</span></div>
+    </div>
+  </div>
+
+  <!-- BLOC 1: URGENTS -->
+  <p class="section-title">⚡ Primers dies — Tràmits urgents</p>
+
+  <div class="step" id="step-2" data-step="2">
+    <div class="step-header" onclick="toggleStep(2)">
+      <div class="step-checkbox" id="cb-2" onclick="toggleDone(event,2)"></div>
+      <div class="step-number">2</div>
+      <div class="step-meta">
+        <div class="step-title">Impresos que donen a l'hospital</div>
+        <div class="step-tags"><span class="tag tag-urgent">⏱ Al sortir de l'hospital</span><span class="tag tag-presencial">Presencial</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>Unes hores després del part us portaran dos documents a l'habitació. L'hospital omple les dades del part; la resta ho heu d'omplir vosaltres. Ompliu-los tranquil·lament abans d'anar al Registre Civil, perquè són una mica llargs.</p>
+      <div class="deadline">⏰ Recolliu-los <strong>abans de sortir de l'hospital</strong> — sense ells no podeu fer cap altra gestió.</div>
+      <p class="docs-title">Documents que us portaran a l'habitació:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Informe mèdic de maternitat</strong> 🟡 (document groc) — Assegureu-vos que estigui signat pel metge o llevadora. Si no ho està, us el signarà en una visita posterior. <strong>Feu-ne fotocòpia: el Registre Civil se'l queda i conté les empremtes del nadó!</strong></div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Butlleta estadística</strong> 🔴 (document vermell) — En algunes ciutats no la donen a l'hospital sinó directament al Registre Civil. Si voleu inscriure el nadó en un Registre Civil d'una altra ciutat, consulteu amb l'hospital.</div></div>
+      <p class="docs-title">Recolliu a l'oficina d'Administració de l'hospital:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Informe d'alta hospitalària</strong> — necessari per al metge de capçalera (pas 3)</div></div>
+    </div>
+  </div>
+
+  <div class="step" id="step-3" data-step="3">
+    <div class="step-header" onclick="toggleStep(3)">
+      <div class="step-checkbox" id="cb-3" onclick="toggleDone(event,3)"></div>
+      <div class="step-number">3</div>
+      <div class="step-meta">
+        <div class="step-title">Inscripció al Registre Civil</div>
+        <div class="step-tags"><span class="tag tag-urgent">⏱ Màx. 8 dies naturals</span><span class="tag tag-presencial">Presencial (cita prèvia)</span><span class="tag tag-online">Iniciable des de l'hospital</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>Tràmit fonamental: dona personalitat jurídica al nadó i és la base de tots els passos posteriors. Molts hospitals ja tramiten la inscripció telemàticament. Si no, cal anar al Registre Civil de la localitat de naixement o del domicili. Cal demanar <strong>cita prèvia</strong>.</p>
+      <div class="deadline">⏰ Passades les <strong>24h del naixement</strong> i com a màxim en <strong>8 dies naturals</strong> (ampliable fins a 30 dies amb causa justificada).</div>
+      <p class="docs-title">Documents necessaris:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI, NIE o passaport en vigor d'<strong>ambdós progenitors</strong></div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Informe mèdic de maternitat</strong> 🟡 (document groc, degudament signat)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Butlleta estadística</strong> 🔴 (document vermell, si us l'han donat a l'hospital)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Llibre de Família en paper si en teniu — us afegiràn la pàgina del nadó. <strong>Feu-ne fotocòpies en sortir!</strong></div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Sentència de separació o divorci, si un dels progenitors va estar anteriorment casat</div></div>
+      <p class="docs-title">Demaneu en el moment (important!):</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">✅ <strong>Certificat literal de naixement del nadó</strong> <span class="doc-new">×2 còpies</span> — Caduca als 6 mesos. Necessari per al DNI i altres tràmits. Demaneu-ne almenys 2.</div></div>
+      <div class="note note-amber">⚠️ <span>Si <strong>no esteu casats</strong>, heu d'anar els dos progenitors. Si esteu casats, pot anar qualsevol dels dos. Si voleu canviar l'ordre dels cognoms, heu d'anar els dos i sol·licitar-ho expressament ara.</span></div>
+      <a href="https://seujudicial.gencat.cat/ca/que_cal_fer/registre-civil/" class="link-btn" target="_blank">🔗 Cita prèvia Registre Civil (Gencat)</a>
+    </div>
+  </div>
+
+  <div class="step" id="step-4" data-step="4">
+    <div class="step-header" onclick="toggleStep(4)">
+      <div class="step-checkbox" id="cb-4" onclick="toggleDone(event,4)"></div>
+      <div class="step-number">4</div>
+      <div class="step-meta">
+        <div class="step-title">Alta per malaltia al metge de capçalera (CAP)</div>
+        <div class="step-tags"><span class="tag tag-condicional">⚠️ Només si la mare estava de baixa laboral prèvia</span><span class="tag tag-presencial">Presencial al CAP</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Aquest pas NOMÉS cal fer-lo si la mare havia demanat la baixa laboral per molèsties durant els últims mesos de l'embaràs.</strong> En aquest cas, cal demanar visita amb el metge de capçalera al CAP per tramitar l'alta mèdica i iniciar correctament el permís de maternitat. Si la mare <em>no</em> estava de baixa prèvia, podeu saltar directament al pas 4.</p>
+      <p class="docs-title">Documents necessaris:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Informe d'alta hospitalària</strong> (recollit a l'hospital al pas 1)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI de la mare (si hi va una altra persona en nom seu)</div></div>
+    </div>
+  </div>
+
+  <!-- BLOC 2: CERTIFICATS EMPRESA -->
+  <p class="section-title">🏢 Certificats de l'empresa (treballadors/es per compte d'altri)</p>
+
+  <div class="step" id="step-5" data-step="5">
+    <div class="step-header" onclick="toggleStep(5)">
+      <div class="step-checkbox" id="cb-5" onclick="toggleDone(event,5)"></div>
+      <div class="step-number">5</div>
+      <div class="step-meta">
+        <div class="step-title">Certificat de l'empresa de la mare</div>
+        <div class="step-tags"><span class="tag tag-condicional">⚠️ No per a treballadores autònomes</span><span class="tag tag-presencial">A l'empresa / RRHH</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Les treballadores autònomes no han de fer aquest pas.</strong> El permís de maternitat funciona com una baixa laboral: l'empresa paga els 2 primers dies i la Seguretat Social la resta (fins a les 17 setmanes). RRHH ha de preparar un certificat amb el salari de la mare.</p>
+      <p class="docs-title">Documents que cal portar:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó (obtingut al Registre Civil, pas 2)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI de la mare (si hi va una altra persona en nom seu)</div></div>
+      <p class="docs-title">Resultat:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">✅ <strong>Certificat d'empresa de la mare</strong> — necessari per a la Seguretat Social (pas 7)</div></div>
+      <div class="note note-amber">💡 <span>Pregunteu si podeu enviar la documentació per correu electrònic prèviament, per tenir el certificat a punt quan aneu. Si esteu cobrant l'atur, cal anar primer al SOC per congelar la prestació.</span></div>
+      <a href="https://www.oficinadetreball.gencat.cat" class="link-btn" target="_blank">🔗 SOC — Oficina de Treball</a>
+    </div>
+  </div>
+
+  <div class="step" id="step-6" data-step="6">
+    <div class="step-header" onclick="toggleStep(6)">
+      <div class="step-checkbox" id="cb-6" onclick="toggleDone(event,6)"></div>
+      <div class="step-number">6</div>
+      <div class="step-meta">
+        <div class="step-title">Certificat de l'empresa del pare / altre progenitor</div>
+        <div class="step-tags"><span class="tag tag-condicional">⚠️ No per a treballadors autònoms</span><span class="tag tag-presencial">A l'empresa / RRHH</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p><strong>Els treballadors autònoms no han de fer aquest pas.</strong> El permís de paternitat funciona exactament igual que el de maternitat: l'empresa paga els 2 primers dies i la SS la resta fins a les 17 setmanes. Cal un certificat de salari del departament de RRHH.</p>
+      <p class="docs-title">Documents que cal portar:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó (obtingut al Registre Civil, pas 2)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI del pare / altre progenitor (si hi va una altra persona en nom seu)</div></div>
+      <p class="docs-title">Resultat:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">✅ <strong>Certificat d'empresa del pare / altre progenitor</strong> — necessari per a la SS (pas 7)</div></div>
+      <div class="note note-amber">💡 <span>Hi ha la possibilitat de gaudir els dies del permís en forma de mitja jornada en comptes de jornada completa. Si cobreu l'atur, cal anar al SOC igual que en el pas anterior.</span></div>
+    </div>
+  </div>
+
+  <!-- BLOC 3: PADRÓ I SS -->
+  <p class="section-title">🏛️ Administració pública</p>
+
+  <div class="step" id="step-7" data-step="7">
+    <div class="step-header" onclick="toggleStep(7)">
+      <div class="step-checkbox" id="cb-7" onclick="toggleDone(event,7)"></div>
+      <div class="step-number">7</div>
+      <div class="step-meta">
+        <div class="step-title">Alta al Padró Municipal</div>
+        <div class="step-tags"><span class="tag tag-urgent">⏱ Primer mes</span><span class="tag tag-presencial">Ajuntament (o en línia)</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>Cal donar d'alta el nadó al padró de l'ajuntament del municipi on hi viurà. A les ciutats grans normalment es fa al districte o barri corresponent. En alguns casos cal cita prèvia — consulteu el vostre ajuntament.</p>
+      <p class="docs-title">Documents necessaris:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó (del Registre Civil, pas 2)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI del pare o de la mare (si tots dos esteu empadronats al mateix domicili, n'hi ha prou amb un)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Si els progenitors estan empadronats a domicilis diferents, haureu d'anar els dos</div></div>
+      <p class="docs-title">Demaneu 3 còpies d'aquest document:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">✅ <strong>Certificat d'empadronament del nadó</strong> <span class="doc-new">×3 còpies</span> — Caduca als 3 mesos. Necessari per a la Seguretat Social, la TSI i el DNI.</div></div>
+      <a href="https://www.barcelona.cat/ca/tramits-i-serveis/tramits/empadronament" class="link-btn" target="_blank">🔗 Ajuntament de Barcelona</a>
+    </div>
+  </div>
+
+  <div class="step" id="step-8" data-step="8">
+    <div class="step-header" onclick="toggleStep(8)">
+      <div class="step-checkbox" id="cb-8" onclick="toggleDone(event,8)"></div>
+      <div class="step-number">8</div>
+      <div class="step-meta">
+        <div class="step-title">Tràmits a la Seguretat Social (INSS) — 3 subtràmits</div>
+        <div class="step-tags"><span class="tag tag-urgent">⏱ Primer mes</span><span class="tag tag-presencial">Presencial INSS (cita prèvia)</span><span class="tag tag-online">O en línia</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>A l'INSS cal fer <strong>tres tràmits</strong>. Reserveu <strong>3 cites consecutives</strong> el més aviat possible — en alguns llocs tarden dies a donar-les. Des del juliol de 2025, els dos progenitors tenen <strong>17 setmanes</strong> de permís (eren 16). Les primeres <strong>6 setmanes són obligatòries</strong> i ininterrompudes. Les 11 restants es poden repartir de manera flexible fins que el nadó compleixi 12 mesos. Prestació: <strong>100% del salari</strong>. Permís <strong>individual i intransferible</strong>.</p>
+      <div class="note note-blue">🆕 <span><strong>Novetat juliol 2025 (RD-Llei 9/2025):</strong> 17 setmanes per a cada progenitor. A partir de l'1/1/2026, 2 setmanes addicionals de permís parental retribuït per a fills fins a 8 anys.</span></div>
+
+      <p class="docs-title">📋 Subtràmit 7a — Prestació de maternitat (mare):</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI de la mare</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat de l'empresa (pas 4) — o últims 3 rebuts d'autònoms (el proporciona el banc)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Imprés "Solicitud de maternidad" — el donen allà</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Imprés "Modelo 145" amb les dades de la mare — el donen allà. Ha d'estar signat per ella.</div></div>
+
+      <p class="docs-title">📋 Subtràmit 7b — Prestació de paternitat (pare / altre progenitor):</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI del pare / altre progenitor</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat de l'empresa (pas 5) — o últims 3 rebuts d'autònoms</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Imprés "Solicitud de paternidad" — el donen allà</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Imprés "Modelo 145" amb les dades del pare — el donen allà. Ha d'estar signat per ell.</div></div>
+
+      <p class="docs-title">📋 Subtràmit 7c — Afiliació del nadó a la SS:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat d'empadronament del nadó (obtingut al pas 6)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Cartilla / document de la SS del progenitor titular (sol ser la mare) — per al número d'afiliació</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Targeta sanitària del progenitor titular</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Imprés d'afiliació del nadó com a beneficiari — el donen allà</div></div>
+      <p class="docs-title">Resultat:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">✅ <strong>Document d'afiliació del nadó a la SS</strong> — necessari per a la TSI (pas 8)</div></div>
+      <div class="note note-amber">💡 <span>Els impresos de la mare han d'estar signats per ella, i els del pare per ell. Per no desplaçar-vos tots dos, descarregueu els formularis prèviament, signeu-los a casa i porteu-los ja signats. Us demanaran el <strong>% de retenció d'IRPF</strong>: mireu la retenció actual de la vostra nòmina i poseu la mateixa xifra.</span></div>
+      <a href="https://sede.seg-social.gob.es" class="link-btn" target="_blank">🔗 Seu electrònica INSS</a>
+    </div>
+  </div>
+
+  <!-- BLOC 4: SANITARI -->
+  <p class="section-title">🏥 Sanitat</p>
+
+  <div class="step" id="step-9" data-step="9">
+    <div class="step-header" onclick="toggleStep(9)">
+      <div class="step-checkbox" id="cb-9" onclick="toggleDone(event,9)"></div>
+      <div class="step-number">9</div>
+      <div class="step-meta">
+        <div class="step-title">Targeta Sanitària Individual (TSI) i assignació del pediatre</div>
+        <div class="step-tags"><span class="tag tag-urgent">⏱ Primer mes</span><span class="tag tag-presencial">Al CAP del domicili</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>Cal dirigir-se al CAP on es faran les revisions periòdiques amb el pediatre. La TSI s'ha de demanar <strong>presencialment la primera vegada</strong>; la renovació sí que es pot fer per internet.</p>
+      <p class="docs-title">Documents necessaris:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Certificat d'empadronament del nadó</strong> (pas 6)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Document d'afiliació del nadó a la SS</strong> com a beneficiari (pas 7c)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI del progenitor que fa la sol·licitud</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Imprés de sol·licitud de la TSI — el donen allà</div></div>
+      <div class="note note-amber">💡 <span>Si teniu pensat fer les revisions amb el pediatre d'una mútua privada (pas 9), no caldria demanar l'assignació del pediatre del CAP. De totes formes, el CAP sol oferir un servei excel·lent: el pediatre va acompanyat d'una infermera que s'ocupa del control de pes i la vacunació.</span></div>
+      <a href="https://catsalut.gencat.cat/ca/ciutadania/tsi-targeta-sanitaria-individual/" class="link-btn" target="_blank">🔗 CatSalut — TSI</a>
+    </div>
+  </div>
+
+
+
+  <!-- BLOC 5: AJUTS ECONÒMICS -->
+  <p class="section-title">💰 Ajuts econòmics i fiscals</p>
+
+  <div class="step" id="step-10" data-step="10">
+    <div class="step-header" onclick="toggleStep(10)">
+      <div class="step-checkbox" id="cb-10" onclick="toggleDone(event,10)"></div>
+      <div class="step-number">10</div>
+      <div class="step-meta">
+        <div class="step-title">Deducció per maternitat — Hisenda (AEAT)</div>
+        <div class="step-tags"><span class="tag tag-urgent">⏱ Primer any</span><span class="tag tag-online">Telèfon o en línia</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>Ajut de fins a <strong>100€/mes</strong> per a mares treballadores (o l'altre progenitor en famílies monoparentals), fins que el nadó compleixi 3 anys. Es pot cobrar mensualment per avançat o reflectir-ho a la declaració de la renda. <strong>Només cal sol·licitar-ho el primer any; la resta d'anys es renova automàticament.</strong></p>
+      <p>Es pot fer per <strong>telèfon al 901 200 345</strong> (la manera més còmoda), en línia o presencialment a l'AEAT.</p>
+      <p class="docs-title">Documents i dades necessàries:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI de la mare (el tràmit el pot fer qualsevol dels dos)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó / dades del Registre Civil</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Número d'afiliació a la SS de la mare</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Número de compte bancari (IBAN) on rebre l'ajut</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Import de la casella 698 de la declaració de la renda de l'any anterior de la mare</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Imprés de sol·licitud Model 140 — el donen allà o es descarrega en línia</div></div>
+      <a href="https://sede.agenciatributaria.gob.es/Sede/procedimientoini/G146.shtml" class="link-btn" target="_blank">🔗 AEAT — Model 140</a>
+    </div>
+  </div>
+
+  <div class="step" id="step-11" data-step="11">
+    <div class="step-header" onclick="toggleStep(11)">
+      <div class="step-checkbox" id="cb-11" onclick="toggleDone(event,11)"></div>
+      <div class="step-number">11</div>
+      <div class="step-meta">
+        <div class="step-title">Prestació econòmica de la Generalitat de Catalunya</div>
+        <div class="step-tags"><span class="tag tag-condicional">⚠️ Famílies amb ingressos baixos</span><span class="tag tag-presencial">Oficina de Benestar Social</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>L'ajut s'anomena <strong>"Prestació econòmica de caràcter universal per infant a càrrec"</strong> i és d'uns <strong>600€ anuals</strong> fins que el nadó compleixi 3 anys. <strong>Atenció: des del 2011 ja no és universal</strong> — es concedeix únicament a famílies amb un nivell baix d'ingressos. Cal anar a qualsevol oficina de Benestar Social (Departament de Drets Socials).</p>
+      <p>Només cal sol·licitar-ho el primer any; la resta d'anys es renova automàticament. La confirmació pot trigar fins a 6 mesos. Si el nadó no neix al gener, el primer any es cobra la part proporcional.</p>
+      <p class="docs-title">Documents necessaris:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI dels dos progenitors (tot i que només cal que hi vagi un)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Certificat literal de naixement del nadó</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Número de compte bancari (IBAN) on rebre l'ajut</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Imprés de sol·licitud — el donen allà; l'ha de segellar el vostre banc</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Documentació acreditativa d'ingressos (declaració de renda o equivalent)</div></div>
+      <a href="https://web.gencat.cat/ca/tramits/tramits-temes/prestacionseconomiques-familia" class="link-btn" target="_blank">🔗 Gencat — Prestacions Família</a>
+    </div>
+  </div>
+
+  <!-- BLOC 6: DNI -->
+  <p class="section-title">📋 Tràmit opcional</p>
+
+  <div class="step" id="step-12" data-step="12">
+    <div class="step-header" onclick="toggleStep(12)">
+      <div class="step-checkbox" id="cb-12" onclick="toggleDone(event,12)"></div>
+      <div class="step-number">12</div>
+      <div class="step-meta">
+        <div class="step-title">Obtenció del DNI del nadó</div>
+        <div class="step-tags"><span class="tag tag-opcional">Opcional — obligatori als 14 anys</span></div>
+      </div>
+      <span class="chevron">▾</span>
+    </div>
+    <div class="step-body">
+      <p>No és obligatori fins als <strong>14 anys</strong>, però cal per viatjar fora d'Espanya (vols internacionals imprescindible; en alguns nacionals el certificat de família tampoc és suficient). Cal demanar cita trucant al <strong>060</strong> o en línia. El nadó ha d'anar presencialment.</p>
+      <div class="deadline">⏰ El <strong>certificat literal de naixement</strong> caduca als 6 mesos. Si voleu fer el DNI aviat, no espereu!</div>
+      <p class="docs-title">Documents necessaris:</p>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Certificat d'empadronament del nadó</strong> (màx. 3 mesos d'antiguitat)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text"><strong>Certificat literal de naixement del nadó</strong> (màx. 6 mesos d'antiguitat)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Fotografia del nadó 32×26mm, fons blanc, cara de front</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">DNI del progenitor acompanyant (en vigor)</div></div>
+      <div class="doc-item" onclick="toggleDoc(this)"><div class="doc-cb"></div><div class="doc-text">Presència física del nadó — obligatòria</div></div>
+      <div class="note note-amber">💡 <span>La presència física de la mare <strong>no és necessària en cap dels tràmits anteriors</strong>. En general, el pare o un altre representant legal pot fer-los tots mentre la mare fa repòs a casa o a l'hospital.</span></div>
+      <a href="https://www.interior.gob.es/opencms/es/servicios-al-ciudadano/tramites-y-gestiones/dni/solicitar-cita-previa-para-el-dni/" class="link-btn" target="_blank">🔗 Cita prèvia DNI</a>
+    </div>
+  </div>
+
+  <!-- CELEBRATION -->
+  <div class="celebration" id="celebration">
+    <h2>🎉 Enhorabona!</h2>
+    <p>Has completat tots els tràmits. Ara a gaudir de la criatura! 👶</p>
+  </div>
+
+  <!-- RESUM DOCUMENTS -->
+  <p class="section-title">📦 Documents clau — Caducitats a vigilar</p>
+  <div class="alert alert-blue" style="margin-top:0;">
+    <span class="alert-icon">📂</span>
+    <div>
+      Guarda tots els documents a la carpeta i vigila les dates de caducitat:<br><br>
+      <strong>✅ Certificat literal de naixement</strong> — caduca als <strong>6 mesos</strong><br>
+      <strong>✅ Certificat d'empadronament</strong> — caduca als <strong>3 mesos</strong><br>
+      <strong>✅ Document d'afiliació SS com a beneficiari</strong><br>
+      <strong>✅ TSI (Targeta Sanitària Individual)</strong><br>
+      <strong>✅ DNI del nadó</strong> (quan el tingueu)
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <p>Informació actualitzada a <strong>2026</strong> a partir de fonts oficials: <a href="https://justicia.gencat.cat" target="_blank">Gencat Justícia</a>, <a href="https://www.seg-social.es" target="_blank">INSS</a>, <a href="https://catsalut.gencat.cat" target="_blank">CatSalut</a> i <a href="https://sede.agenciatributaria.gob.es" target="_blank">AEAT</a>.<br>
+  Estructura basada en <a href="https://tramitsnaixement.com" target="_blank">tramitsnaixement.com</a>. Guia orientativa; verifica sempre la informació amb les administracions competents.</p>
+</footer>
+
+<script>
+  const TOTAL = 12;
+  function getState() { try { return JSON.parse(localStorage.getItem('tramits25')||'{}'); } catch(e){ return {}; } }
+  function saveState(s) { try { localStorage.setItem('tramits25', JSON.stringify(s)); } catch(e){} }
+  function updateProgress() {
+    const s = getState();
+    const done = Object.values(s.steps||{}).filter(Boolean).length;
+    document.getElementById('progress-fill').style.width = Math.round(done/TOTAL*100)+'%';
+    document.getElementById('progress-text').textContent = done+' de '+TOTAL+' tràmits completats';
+    document.getElementById('celebration').style.display = done===TOTAL?'block':'none';
+  }
+  function toggleStep(n) { document.getElementById('step-'+n).classList.toggle('open'); }
+  function toggleDone(e,n) {
+    e.stopPropagation();
+    const s = getState(); if(!s.steps) s.steps={};
+    s.steps[n] = !s.steps[n]; saveState(s);
+    const cb = document.getElementById('cb-'+n), step = document.getElementById('step-'+n);
+    if(s.steps[n]){ cb.classList.add('checked'); step.classList.add('done'); }
+    else { cb.classList.remove('checked'); step.classList.remove('done'); }
+    updateProgress();
+  }
+  function toggleDoc(el) { el.querySelector('.doc-cb').classList.toggle('checked'); }
+  const s = getState();
+  if(s.steps) Object.entries(s.steps).forEach(([n,done])=>{ if(done){ const cb=document.getElementById('cb-'+n),step=document.getElementById('step-'+n); if(cb)cb.classList.add('checked'); if(step)step.classList.add('done'); } });
+  updateProgress();
+</script>
+</body>
+</html>
